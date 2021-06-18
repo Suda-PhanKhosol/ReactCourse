@@ -33,7 +33,6 @@ export const getProductGroupFilter = (
   Name,
   StatusId
 ) => {
-  debugger;
   let payload = {
     page,
     recordsPerPage,

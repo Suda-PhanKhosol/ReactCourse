@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-imports */
 
 import React from "react";
-import * as demoAxios from "../_redux/demoAxios";
+import * as productAxios from "../_redux/productAxios";
 import { Chip, Icon } from "@material-ui/core";
 import DoneIcon from "@material-ui/icons/Done";
 import { Paper, Grid } from "@material-ui/core";
@@ -10,7 +10,7 @@ import EditButton from "../../Common/components/Buttons/EditButton";
 import { makeStyles } from "@material-ui/core/styles";
 import Link from "@material-ui/core/Link";
 import StandardDataTable from "../../Common/components/DataTable/StandardDataTable";
-import SearchBox from "../components/datatableDemo/SearchBox";
+import ProductSearchBox from '../components/ProductSearchBox'
 import ColumnDateTime from "../../Common/components/DataTable/ColumnDateTime";
 import ColumnNumber from "../../Common/components/DataTable/ColumnNumber";
 
@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function DatatableListDemo(props) {
+function Products(props) {
   const classes = useStyles();
 
   const [paginated, setPaginated] = React.useState({
@@ -37,8 +37,7 @@ function DatatableListDemo(props) {
     orderingField: "",
     ascendingOrder: true,
     searchValues: {
-      searchProductGroupStatus: 0,
-      searchProductGroupName: "",
+      name: "",
     },
     lastUpdate: new Date(),
   });
@@ -48,14 +47,13 @@ function DatatableListDemo(props) {
 
   //load Data
   const loadData = () => {
-    demoAxios
-      .getProductGroupFilter(
+    productAxios
+      .getProductFilter(
         paginated.orderingField,
         paginated.ascendingOrder,
         paginated.page,
         paginated.recordsPerPage,
-        paginated.searchValues.searchProductGroupName,
-        paginated.searchValues.searchProductGroupStatus
+        paginated.searchValues.name,
       )
       .then((res) => {
         if (res.data.isSuccess) {
@@ -78,8 +76,7 @@ function DatatableListDemo(props) {
     let newPaginated = {
       ...paginated,
       searchValues: {
-        searchProductGroupStatus: values.productGroupStatus,
-        searchProductGroupName: values.productGroupName,
+        name: values.name,
       },
       lastUpdate: new Date(),
     };
@@ -88,10 +85,13 @@ function DatatableListDemo(props) {
 
   // column
   const columns = [
+    //   id
     {
       name: "id",
       label: "รหัสรายการ",
     },
+
+    // name
     {
       name: "name",
       label: "รายการ",
@@ -99,6 +99,27 @@ function DatatableListDemo(props) {
         sort: false,
       },
     },
+
+    // price
+    {
+        name: "price",
+        label: "ราคา",
+        options: {
+            customBodyRenderLite: (dataIndex, rowIndex) => {
+              return (
+                <ColumnDateTime Data={data[dataIndex].createdDate}></ColumnDateTime>
+              );
+            },
+          },
+      },
+
+    // stock
+    {
+      name: "stock",
+      label: "Stock",
+    },
+
+    //status
     {
       name: "statusId",
       label: "สถานะ",
@@ -147,6 +168,8 @@ function DatatableListDemo(props) {
         },
       },
     },
+
+    // createdDate
     {
       name: "วันที่สร้าง",
       options: {
@@ -158,21 +181,7 @@ function DatatableListDemo(props) {
       },
     },
 
-    {
-      name: "จำนวน",
-      options: {
-        customBodyRenderLite: (dataIndex, rowIndex) => {
-          return (
-            <ColumnNumber
-              Data={"10000"}
-              thousandSeparator
-              isNumericString
-            ></ColumnNumber>
-          );
-        },
-      },
-    },
-
+    // edit
     {
       name: "",
       options: {
@@ -215,7 +224,7 @@ function DatatableListDemo(props) {
       <Paper elevation={3} className={classes.paper}>
         <Grid container spacing={3}>
           <Grid item xs={12} lg={12}>
-            <SearchBox updateSearch={handleUpdateSearch.bind(this)}></SearchBox>
+            <ProductSearchBox updateSearch={handleUpdateSearch.bind(this)}></ProductSearchBox>
           </Grid>
           <Grid item xs={12} lg={12}>
             <StandardDataTable
@@ -250,4 +259,4 @@ function DatatableListDemo(props) {
   );
 }
 
-export default DatatableListDemo;
+export default Products;

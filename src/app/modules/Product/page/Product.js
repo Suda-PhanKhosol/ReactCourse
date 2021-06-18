@@ -2,17 +2,17 @@
 /* eslint-disable no-restricted-imports */
 
 import React from "react";
-import * as demoAxios from "../_redux/demoAxios";
-import { Chip, Icon } from "@material-ui/core";
-import DoneIcon from "@material-ui/icons/Done";
+import * as productAxios from "../_redux/productAxios";
 import { Paper, Grid } from "@material-ui/core";
 import EditButton from "../../Common/components/Buttons/EditButton";
 import { makeStyles } from "@material-ui/core/styles";
 import Link from "@material-ui/core/Link";
 import StandardDataTable from "../../Common/components/DataTable/StandardDataTable";
-import SearchBox from "../components/datatableDemo/SearchBox";
+import ProductSearchBox from "../components/ProductSearchBox";
 import ColumnDateTime from "../../Common/components/DataTable/ColumnDateTime";
 import ColumnNumber from "../../Common/components/DataTable/ColumnNumber";
+import ColumnIsActive from "../../Common/components/DataTable/ColumnIsActive";
+import { useHistory } from "react-router-dom";
 
 var flatten = require("flat");
 
@@ -28,8 +28,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function DatatableListDemo(props) {
+function Products(props) {
   const classes = useStyles();
+
+  const history = useHistory();
 
   const [paginated, setPaginated] = React.useState({
     page: 1,
@@ -37,8 +39,8 @@ function DatatableListDemo(props) {
     orderingField: "",
     ascendingOrder: true,
     searchValues: {
-      searchProductGroupStatus: 0,
-      searchProductGroupName: "",
+      name: "",
+      productGroupId: 1,
     },
     lastUpdate: new Date(),
   });
@@ -48,14 +50,14 @@ function DatatableListDemo(props) {
 
   //load Data
   const loadData = () => {
-    demoAxios
-      .getProductGroupFilter(
+    productAxios
+      .getProductFilter(
         paginated.orderingField,
         paginated.ascendingOrder,
         paginated.page,
         paginated.recordsPerPage,
-        paginated.searchValues.searchProductGroupName,
-        paginated.searchValues.searchProductGroupStatus
+        paginated.searchValues.name,
+        paginated.searchValues.productGroupId
       )
       .then((res) => {
         if (res.data.isSuccess) {
@@ -63,6 +65,7 @@ function DatatableListDemo(props) {
           res.data.data.forEach((element) => {
             flatData.push(flatten(element));
           });
+          debugger;
           setData(flatData);
           setTotalRecords(res.data.totalAmountRecords);
         } else {
@@ -78,8 +81,8 @@ function DatatableListDemo(props) {
     let newPaginated = {
       ...paginated,
       searchValues: {
-        searchProductGroupStatus: values.productGroupStatus,
-        searchProductGroupName: values.productGroupName,
+        name: values.name,
+        productGroupId: values.productGroupId,
       },
       lastUpdate: new Date(),
     };
@@ -88,10 +91,19 @@ function DatatableListDemo(props) {
 
   // column
   const columns = [
+    //   id
     {
       name: "id",
       label: "รหัสรายการ",
     },
+
+    // Product group
+    {
+      name: "productGroup.name",
+      label: "Group",
+    },
+
+    // name
     {
       name: "name",
       label: "รายการ",
@@ -99,54 +111,43 @@ function DatatableListDemo(props) {
         sort: false,
       },
     },
+
+    // price
+    {
+      name: "price",
+      label: "ราคา",
+      options: {
+        customBodyRenderLite: (dataIndex, rowIndex) => {
+          return (
+            <ColumnNumber
+              Data={data[dataIndex].price}
+              thousandSeparator
+              isNumericString
+            ></ColumnNumber>
+          );
+        },
+      },
+    },
+
+    // stock
+    {
+      name: "stock",
+      label: "Stock",
+    },
+
     {
       name: "statusId",
       label: "สถานะ",
       options: {
         customBodyRenderLite: (dataIndex, rowIndex) => {
-          if (data[dataIndex].statusId === 1) {
-            return (
-              <Grid
-                style={{ padding: 0, margin: 0 }}
-                container
-                direction="row"
-                justify="flex-start"
-                alignItems="center"
-              >
-                <Chip
-                  color="primary"
-                  icon={<DoneIcon style={{ color: "#fff" }} />}
-                  style={{ color: "#fff" }}
-                  label="ใช้งาน"
-                />
-              </Grid>
-            );
-          } else {
-            return (
-              <Grid
-                style={{ padding: 0, margin: 0 }}
-                container
-                direction="row"
-                justify="flex-start"
-                alignItems="center"
-              >
-                <Chip
-                  color="primary"
-                  icon={
-                    <Icon
-                      style={{ backgroundColor: "#e57373", color: "#fff" }}
-                      className="far fa-times-circle"
-                    ></Icon>
-                  }
-                  style={{ backgroundColor: "#e57373", color: "#fff" }}
-                  label="ไม่ใช้งาน"
-                />
-              </Grid>
-            );
-          }
+          return (
+            <ColumnIsActive data={data[dataIndex].statusId} activeText="ใช้งาน" inActiveText="ไม่ใช้งาน"></ColumnIsActive>
+          );
         },
       },
     },
+
+    // createdDate
     {
       name: "วันที่สร้าง",
       options: {
@@ -158,21 +159,7 @@ function DatatableListDemo(props) {
       },
     },
 
-    {
-      name: "จำนวน",
-      options: {
-        customBodyRenderLite: (dataIndex, rowIndex) => {
-          return (
-            <ColumnNumber
-              Data={"10000"}
-              thousandSeparator
-              isNumericString
-            ></ColumnNumber>
-          );
-        },
-      },
-    },
-
+    // edit
     {
       name: "",
       options: {
@@ -203,7 +190,7 @@ function DatatableListDemo(props) {
   ];
 
   const handleEdit = (id) => {
-    alert(id);
+    history.push(`/product/edit/${id}`)
   };
 
   React.useEffect(() => {
@@ -215,7 +202,9 @@ function DatatableListDemo(props) {
       <Paper elevation={3} className={classes.paper}>
         <Grid container spacing={3}>
           <Grid item xs={12} lg={12}>
-            <SearchBox updateSearch={handleUpdateSearch.bind(this)}></SearchBox>
+            <ProductSearchBox
+              updateSearch={handleUpdateSearch.bind(this)}
+            ></ProductSearchBox>
           </Grid>
           <Grid item xs={12} lg={12}>
             <StandardDataTable
@@ -250,4 +239,4 @@ function DatatableListDemo(props) {
   );
 }
 
-export default DatatableListDemo;
+export default Products;

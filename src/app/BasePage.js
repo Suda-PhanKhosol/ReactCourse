@@ -37,6 +37,10 @@ import ChartDrillDownDemo from "./modules/_Demo/pages/ChartDrillDownDemo";
 import QRReaderDemo from "./modules/_Demo/pages/QRReaderDemo";
 import Payment from "./modules/Payment/pages/Payment";
 import Income from "./modules/Payment/pages/Income";
+import Product from "./modules/Product/page/Product";
+import ProductAddEdit from "./modules/Product/page/ProductAddEdit";
+
+
 
 
 export default function BasePage(props) {
@@ -231,6 +235,27 @@ export default function BasePage(props) {
             path="/income"
             component={Income}
             title="Income"
+          />    
+
+        <ContentRoute
+            exact
+            path="/product"
+            component={Product}
+            title="Product"
+          />   
+
+            <ContentRoute
+            exact
+            path="/product/edit/:id"
+            component={ProductAddEdit}
+            title="Product"
+          /> 
+
+            <ContentRoute
+            exact
+            path="/product/new"
+            component={ProductAddEdit}
+            title="Product"
           />    
 
         <Route path="/errorUnAuthorized" component={ErrorUnAuthorized} />

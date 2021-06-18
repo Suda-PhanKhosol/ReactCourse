@@ -372,6 +372,25 @@ export function AsideMenuList({ layoutProps }) {
                 </NavLink>
               </li>
               {/* end: Payment */}
+
+
+              
+              {/*begin: Payment*/}
+              <li
+                className={`menu-item  ${getMenuItemActive("/product")}`}
+                aria-haspopup="true"
+              >
+                <NavLink className="menu-link" to="/product">
+                  <span className="svg-icon menu-icon">
+                    <Icon>star</Icon>
+                  </span>
+                  <span className="menu-text">product (Data table)</span>
+                </NavLink>
+              </li>
+              {/* end: Payment */}
+
+
+
               {/*end::2 Level*/}
             </ul>
           </div>
